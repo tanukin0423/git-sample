@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社会人基礎力診断ツール</title>
+    <style>
+        :root {
+            --action-color: #4e79a7;
+            --thinking-color: #f28e2b;
+            --teamwork-color: #e15759;
+            --light-gray: #f0f0f0;
+            --medium-gray: #d9d9d9;
+            --dark-gray: #7f7f7f;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+        }
+        
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-top: 30px;
+            font-size: 1.5em;
+        }
+        
+        h3 {
+            color: #2c3e50;
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+        
+        .overall-progress {
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .category-status {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .status-card {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .status-card.completed {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .status-card.current {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .status-card.pending {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: var(--light-gray);
+            border-radius: 5px;
+            margin: 25px 0;
+            height: 25px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 5px;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 0%;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+        
+        .progress-text {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .pill-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .pill-btn {
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            font-size: 0.95em;
+            position: relative;
+        }
+        
+        .pill-btn.action {
+            background-color: var(--action-color);
+            color: white;
+        }
+        
+        .pill-btn.thinking {
+            background-color: var(--thinking-color);
+            color: white;
+        }
+        
+        .pill-btn.teamwork {
+            background-color: var(--teamwork-color);
+            color: white;
+        }
+        
+        .pill-btn.completed::after {
+            content: '✓';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--success-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .pill-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .pill-btn.active {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .question-card {
+            background: white;
+            border: 1px solid var(--medium-gray);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .question-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            border-radius: 8px 0 0 8px;
+        }
+        
+        .question-card.action::before {
+            background-color: var(--action-color);
+        }
+        
+        .question-card.thinking::before {
+            background-color: var(--thinking-color);
+        }
+        
+        .question-card.teamwork::before {
+            background-color: var(--teamwork-color);
+        }
+        
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .question-number {
+            font-weight: bold;
+            color: var(--dark-gray);
+        }
+        
+        .question-text {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+        
+        .rating-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .rating-btn {
+            width: 18%;
+            padding: 8px 0;
+            text-align: center;
+            border: 1px solid var(--medium-gray);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .rating-btn:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .rating-btn.selected {
+            background-color: #2c3e50;
+            color: white;
+            border-color: #2c3e50;
+        }
+        
+        .rating-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.8em;
+            color: var(--dark-gray);
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 5px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            margin-top: 10px;
+            box-sizing: border-box;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #2c3e50;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1a252f;
+        }
+        
+        .btn-secondary {
+            background-color: var(--light-gray);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--medium-gray);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        #resultsContainer {
+            margin-top: 40px;
+        }
+        
+        .strength-card {
+            background: #f8f9fa;
+            border-left: 4px solid;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .strength-card.action {
+            border-left-color: var(--action-color);
+        }
+        
+        .strength-card.thinking {
+            border-left-color: var(--thinking-color);
+        }
+        
+        .strength-card.teamwork {
+            border-left-color: var(--teamwork-color);
+        }
+        
+        .strength-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        #radarChartContainer {
+            width: 100%;
+            max-width: 700px;
+            margin: 30px auto;
+            height: 500px;
+        }
+        
+        .score-explanation {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        
+        .summary-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            line-height: 1.8;
+        }
+        
+        .summary-text h3 {
+            color: white;
+            margin-top: 0;
+        }
+        
+        .episode-card {
+            background: white;
+            border-left: 4px solid var(--action-color);
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .episode-card.thinking {
+            border-left-color: var(--thinking-color);
+        }
+        
+        .episode-card.teamwork {
+            border-left-color: var(--teamwork-color);
+        }
+        
+        .episode-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .episode-content {
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        @media print {
+            .no-print {
+                display: none;
+            }
+            
+            body {
+                background: none;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .category-status {
+                flex-direction: column;
+            }
+            
+            #radarChartContainer {
+                height: 400px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>社会人基礎力診断ツール</h1>
+        
+        <div class="overall-progress" id="overallProgress">
+            全体進捗: 0% (0/3カテゴリ完了)
+        </div>
+        
+        <div class="category-status" id="categoryStatus">
+            <div class="status-card pending" data-category="action">
+                <div>前に踏み出す力</div>
+                <small>未実施</small>
+            </div>
+            <div class="status-card pending" data-category="thinking">
+                <div>考え抜く力</div>
+                <small>未実施</small>
+            </div>
+            <div class="status-card pending" data-category="teamwork">
+                <div>チームで働く力</div>
+                <small>未実施</small>
+            </div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar">
+                <span class="progress-text" id="progressText">0%</span>
+            </div>
+        </div>
+        
+        <div id="categorySelection" class="no-print">
+            <h2>診断カテゴリを選択</h2>
+            <p>社会人基礎力の3つの能力グループから診断したいカテゴリを選んでください</p>
+            
+            <div class="pill-container">
+                <button class="pill-btn action" data-category="action">前に踏み出す力</button>
+                <button class="pill-btn thinking" data-category="thinking">考え抜く力</button>
+                <button class="pill-btn teamwork" data-category="teamwork">チームで働く力</button>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-success hidden" id="showFinalResults">全結果を表示</button>
+            </div>
+        </div>
+        
+        <div id="questionSection" class="hidden no-print">
+            <h2 id="currentCategoryTitle"></h2>
+            <p id="categoryDescription"></p>
+            
+            <div id="questionCards"></div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-secondary" id="backToCategories">カテゴリ選択に戻る</button>
+                <button class="btn btn-primary" id="saveResponses">このカテゴリを完了</button>
+            </div>
+        </div>
+        
+        <div id="resultsContainer" class="hidden">
+            <h2>社会人基礎力 総合診断結果</h2>
+            
+            <div id="radarChartContainer">
+                <canvas id="radarChart"></canvas>
+            </div>
+            
+            <div class="summary-text" id="summaryText">
+                <h3>あなたの社会人基礎力プロフィール</h3>
+                <div id="profileText"></div>
+            </div>
+            
+            <div class="score-explanation">
+                <h3>スコア評価基準</h3>
+                <p><strong>5点</strong>: 非常に得意／頻繁に実践している</p>
+                <p><strong>4点</strong>: 得意／よく実践している</p>
+                <p><strong>3点</strong>: 普通／時々実践している</p>
+                <p><strong>2点</strong>: やや苦手／あまり実践しない</p>
+                <p><strong>1点</strong>: 苦手／ほとんど実践しない</p>
+            </div>
+            
+            <h3>カテゴリ別詳細分析</h3>
+            <div id="detailedAnalysis"></div>
+            
+            <h3><i class="fas fa-briefcase"></i> あなたへのおすすめの職業</h3>
+            <div id="jobMatchingSection">
+                <div id="jobMatchingResults"></div>
+            </div>
+            <h3>具体的なエピソード集</h3>
+            <div id="episodeCollection"></div>
+            
+            <div class="action-buttons no-print">
+                <button class="btn btn-secondary" id="backToQuestions">追加診断を行う</button>
+                <button class="btn btn-primary" id="printResults">結果を印刷</button>
+                <button class="btn btn-success" id="saveCompleteResults">完全版結果を保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        // アプリケーションの状態管理
+        const state = {
+            currentCategory: null,
+            responses: {},
+            completedCategories: new Set(),
+            radarChart: null
+        };
+
+        // 社会人基礎力の質問データ（経済産業省定義）
+        const questionsData = {
+            "action": {
+                "name": "前に踏み出す力（アクション）",
+                "description": "一歩前に踏み出し、失敗しても粘り強く取り組む力",
+                "color": "#4e79a7",
+                "abilities": {
+                    "主体性": {
+                        "name": "主体性",
+                        "description": "物事に進んで取り組む力",
+                        "questions": [
+                            
+                            {
+                                "questionText": "新しい課題や問題に自ら気付き、進んで取り組む",
+                                "placeholderText": "例：サークルの新歓活動で、例年の課題だった参加者数の伸び悩みに気づき、SNSを活用した新しい広報戦略を提案・実行しました。"
+                            },
+                            {
+                                "questionText": "周囲の意見を待つのではなく、自分から行動を起こす",
+                                "placeholderText": "例：グループワークで議論が停滞した際、率先して意見を述べ、議論を活性化させました。"
+                            },
+                            {
+                                "questionText": "困難なことでも必要と判断すれば積極的に挑戦する",
+                                "placeholderText": "例：未経験のプログラミング言語習得が必要な卒業研究のテーマに、自ら立候補して取り組み、成果を上げました。"
+                            },
+                            {
+                                "questionText": "自らの役割を認識し、責任を持て行動する",
+                                "placeholderText": "例：文化祭の実行委員として、担当した広報物の作成・配布に責任を持ち、目標数を達成しました。"
+                            },
+                            {
+                                "questionText": "自己成長のために自発的に学ぶ姿勢を持っている",
+                                "placeholderText": "例：専門知識を深めるため、自主的にオンライン講座を受講し、関連資格を取得しました。"
+                            }
+                        ]
+                    },
+                    "働きかけ力": {
+                        "name": "働きかけ力",
+                        "description": "他人に働きかけ巻き込む力",
+                        "questions": [
+                            
+                            {
+                                "questionText": "チームの目標達成のために、他者に働きかける",
+                                "placeholderText": "例：学園祭の模擬店で売上目標達成のため、役割分担や声かけ方法をメンバーに提案し、協力を促しました。"
+                            },
+                            {
+                                "questionText": "自分の考えを伝え、他者を納得させることができる",
+                                "placeholderText": "例：ゼミの研究発表で、データに基づいた論理的な説明を心掛け、教授や他の学生からの質問にも的確に答え、提案内容に納得してもらいました。"
+                            },
+                            {
+                                "questionText": "意見が対立する場面でも、建設的な議論を促す",
+                                "placeholderText": "例：グループディスカッションで意見が割れた際、双方の意見の良い点を整理し、共通のゴールを見据えた議論を促しました。"
+                            },
+                            {
+                                "questionText": "他者の強みを活かすように働きかける",
+                                "placeholderText": "例：サークルのイベント企画で、絵が得意なメンバーにポスター作成を、話すのが得意なメンバーに司会を依頼するなど、適材適所を意識しました。"
+                            },
+                            {
+                                "questionText": "プロジェクトを推進するために必要な協力を得られる",
+                                "placeholderText": "例：卒業研究で他大学の研究室の協力が必要になった際、研究の意義や計画を丁寧に説明し、協力を得ることができました。"
+                            }
+                        ]
+                    },
+                    "実行力": {
+                        "name": "実行力",
+                        "description": "目標を設定し確実に行動する力",
+                        "questions": [
+                            
+                            {
+                                "questionText": "明確な目標を設定し、計画的に行動する",
+                                "placeholderText": "例：資格試験合格という目標に対し、3ヶ月間の学習計画を立て、毎日2時間の勉強時間を確保して実行しました。"
+                            },
+                            {
+                                "questionText": "途中で困難に直面しても、最後までやり遂げる",
+                                "placeholderText": "例：長期インターンシップで、途中で仕様変更という困難がありましたが、粘り強く対応し、プロジェクトを完遂させました。"
+                            },
+                            {
+                                "questionText": "時間管理を適切に行い、締め切りを守る",
+                                "placeholderText": "例：複数の課題やアルバイトを両立させるため、タスク管理ツールを活用し、全ての締め切りを守りました。"
+                            },
+                            {
+                                "questionText": "行動の優先順位を判断し、効率的に取り組む",
+                                "placeholderText": "例：試験勉強の際、苦手科目に重点を置きつつ、得意科目も疎かにしないよう優先順位をつけて効率的に学習しました。"
+                            },
+                            {
+                                "questionText": "結果を振り返り、次に活かす改善を行う",
+                                "placeholderText": "例：アルバイトでの接客アンケートの結果を分析し、自身の対応の改善点を見つけて次に活かしました。"
+                            }
+                        ]
+                    }
+                }
+            },
+            "thinking": {
+                "name": "考え抜く力（シンキング）",
+                "description": "疑問を持ち、考え抜く力",
+                "color": "#f28e2b",
+                "abilities": {
+                    "課題発見力": {
+                        "name": "課題発見力",
+                        "description": "現状を分析し目的や課題を明らかにする力",
+                        "questions": [
+                            
+                            {
+                                "questionText": "現状の問題点や改善点を見つけ出す",
+                                "placeholderText": "例：所属するテニスサークルの部員減少という問題に対し、新入生へのアプローチ方法やイベント内容に改善点があることを見つけました。"
+                            },
+                            {
+                                "questionText": "物事の本質を見極め、核心的な課題を特定する",
+                                "placeholderText": "例：アルバイト先の売上低迷に対し、表面的な原因だけでなく、顧客層の変化という本質的な課題を特定しました。"
+                            },
+                            {
+                                "questionText": "多角的な視点から問題を分析する",
+                                "placeholderText": "例：学園祭の企画が難航した際、参加者、運営、予算など、様々な視点から問題点を洗い出しました。"
+                            },
+                            {
+                                "questionText": "データや事実に基づいて課題を明確にする",
+                                "placeholderText": "例：ウェブサイトのアクセスログを分析し、離脱率が高いページとその原因を特定しました。"
+                            },
+                            {
+                                "questionText": "将来のリスクや機会を予測する",
+                                "placeholderText": "例：所属団体の活動資金について、将来的な会員数減少リスクを予測し、新たな資金調達方法を検討しました。"
+                            }
+                        ]
+                    },
+                    "計画力": {
+                        "name": "計画力",
+                        "description": "課題の解決に向けたプロセスを明らかにし準備する力",
+                        "questions": [
+                            
+                            {
+                                "questionText": "課題解決のための具体的なステップを考える",
+                                "placeholderText": "例：研究テーマ達成のため、文献調査、実験準備、データ収集、分析、論文執筆という具体的なステップを計画しました。"
+                            },
+                            {
+                                "questionText": "現実的なスケジュールと実行計画を立てる",
+                                "placeholderText": "例：グループプロジェクトで、各メンバーの得意分野と作業量を考慮し、無理のない現実的なスケジュールを作成しました。"
+                            },
+                            {
+                                "questionText": "想定される障害を予測し、対策を準備する",
+                                "placeholderText": "例：海外旅行の計画時、天候不良や交通機関の遅延を予測し、代替案や予備日を設けました。"
+                            },
+                            {
+                                "questionText": "必要なリソース（人・物・情報）を適切に配置する",
+                                "placeholderText": "例：イベント企画で、予算内で必要な物品をリストアップし、各担当者に役割と情報を割り当てました。"
+                            },
+                            {
+                                "questionText": "計画を柔軟に見直し、適応させる",
+                                "placeholderText": "例：研究実験が計画通り進まなかった際、原因を分析し、計画を修正して代替アプローチを試みました。"
+                            }
+                        ]
+                    },
+                    "創造力": {
+                        "name": "創造力",
+                        "description": "新しい価値を生み出す力",
+                        "questions": [
+                           
+                            {
+                                "questionText": "既存の枠組みにとらわれず新しい発想をする",
+                                "placeholderText": "例：サークルの広報活動で、従来のチラシ配布だけでなく、SNSでの動画コンテンツ配信という新しい発想を取り入れました。"
+                            },
+                            {
+                                "questionText": "異なる要素を組み合わせて新しい価値を創造する",
+                                "placeholderText": "例：地域の特産品とIT技術を組み合わせ、新しい観光アプリのアイデアを考案しました。"
+                            },
+                            {
+                                "questionText": "失敗を恐れず、実験的な試みを行う",
+                                "placeholderText": "例：プログラミング学習で、教科書通りでなく、自分で考えたアルゴリズムを試行錯誤しながら実装しました。"
+                            },
+                            {
+                                "questionText": "従来とは異なるアプローチを考える",
+                                "placeholderText": "例：アルバイト先の集客方法として、従来の割引キャンペーンではなく、体験型イベントを企画・提案しました。"
+                            },
+                            {
+                                "questionText": "斬新なアイデアを具体化する方法を考える",
+                                "placeholderText": "例：環境問題解決のための斬新なアイデアを思いつき、それを実現するための具体的なステップや必要な技術を検討しました。"
+                            }
+                        ]
+                    }
+                }
+            },
+            "teamwork": {
+                "name": "チームで働く力（チームワーク）",
+                "description": "多様な人々とともに、目標に向けて協力する力",
+                "color": "#e15759",
+                "abilities": {
+                    "発信力": {
+                        "name": "発信力",
+                        "description": "自分の意見をわかりやすく伝える力",
+                        "questions": [
+                            
+                            {
+                                "questionText": "自分の考えを論理的かつ明確に伝える",
+                                "placeholderText": "例：ゼミの発表で、結論、理由、具体例の順で構成を工夫し、自分の考えを論理的に伝えました。"
+                            },
+                            {
+                                "questionText": "相手の理解度に合わせて説明を調整する",
+                                "placeholderText": "例：後輩に研究内容を説明する際、専門用語を避け、身近な例え話を用いて分かりやすく伝えました。"
+                            },
+                            {
+                                "questionText": "適切なタイミングで意見を表明する",
+                                "placeholderText": "例：会議で議論が白熱している中、一度冷静になるよう促し、自分の意見を適切なタイミングで述べました。"
+                            },
+                            {
+                                "questionText": "プレゼンテーションスキルを活用して伝える",
+                                "placeholderText": "例：学術発表会で、視覚的な資料やジェスチャーを効果的に使い、聴衆を引き込むプレゼンテーションを行いました。"
+                            },
+                            {
+                                "questionText": "複雑な内容でも簡潔にまとめて伝える",
+                                "placeholderText": "例：長文のレポートの要点を3点に絞り、忙しい教授にも短時間で内容が伝わるように工夫しました。"
+                            }
+                            
+                        ]
+                    },
+                    "傾聴力": {
+                        "name": "傾聴力",
+                        "description": "相手の意見を丁寧に聴く力",
+                        "questions": [
+                           
+                            {
+                                "questionText": "相手の話に集中し、最後まで聴く",
+                                "placeholderText": "例：友人が悩みを相談してきた際、途中で口を挟まず、相手が話し終わるまで真剣に耳を傾けました。"
+                            },
+                            {
+                                "questionText": "相手の真意を理解しようと努める",
+                                "placeholderText": "例：お客様のクレーム対応時、表面的な言葉だけでなく、その背景にある不満や期待を理解しようと努めました。"
+                            },
+                            {
+                                "questionText": "適切な相槌や質問で理解を深める",
+                                "placeholderText": "例：インタビュー調査を行う際、「なるほど」「具体的にはどういうことですか？」といった相槌や質問を挟み、相手の話を深掘りしました。"
+                            },
+                            {
+                                "questionText": "感情的な意見でも冷静に受け止める",
+                                "placeholderText": "例：チームメンバーが不満を感情的にぶつけてきた際も、まずは冷静に受け止め、相手の気持ちを落ち着かせることを優先しました。"
+                            },
+                            {
+                                "questionText": "言葉以外のサイン（表情・態度）からも読み取る",
+                                "placeholderText": "例：グループワーク中、発言は少ないものの、困った表情をしているメンバーに気づき、声をかけてサポートしました。"
+                            }
+                        ]
+                    },
+                    "柔軟性": {
+                        "name": "柔軟性",
+                        "description": "意見の違いや立場の違いを理解する力",
+                        "questions": [
+                            
+                            {
+                                "questionText": "異なる意見や価値観を受け入れる",
+                                "placeholderText": "例：国際交流イベントで、文化背景の異なる参加者の意見を尊重し、多様な価値観を受け入れました。"
+                            },
+                            {
+                                "questionText": "相手の立場に立って物事を考える",
+                                "placeholderText": "例：アルバイト先のシフト調整で、他のスタッフの事情を考慮し、自分の希望だけでなく相手の立場も考えて調整案を提案しました。"
+                            },
+                            {
+                                "questionText": "状況に応じて自分の行動を調整する",
+                                "placeholderText": "例：イベント当日に予期せぬトラブルが発生した際、当初の計画に固執せず、状況に合わせて臨機応応変に対応しました。"
+                            },
+                            {
+                                "questionText": "対立を解消するための妥協点を見つける",
+                                "placeholderText": "例：意見が対立したメンバー間で、双方の主張の共通点を探り、お互いが納得できる妥協点を見つけ出しました。"
+                            },
+                            {
+                                "questionText": "変化に迅速に対応する",
+                                "placeholderText": "例：授業で急な課題変更があった際も、慌てずに新しい指示を理解し、迅速に対応しました。"
+                            }
+                        ]
+                    },
+                    "状況把握力": {
+                        "name": "状況把握力",
+                        "description": "自分と周囲の人々や物事との関係性を理解する力",
+                        "questions": [
+                            
+                            {
+                                "questionText": "チーム内の自分の役割を理解している",
+                                "placeholderText": "例：サッカー部で、自分のポジションの役割だけでなく、チーム全体の戦略における自分の役割を常に意識してプレーしました。"
+                            },
+                            {
+                                "questionText": "組織の目標と自分の仕事の関係を把握している",
+                                "placeholderText": "例：インターンシップで任された業務が、会社のどの目標達成に繋がるのかを理解した上で取り組みました。"
+                            },
+                            {
+                                "questionText": "周囲の人の状況や感情に気を配る",
+                                "placeholderText": "例：研究室で、実験がうまくいかず落ち込んでいる同僚に気づき、声をかけて励ましました。"
+                            },
+                            {
+                                "questionText": "場の空気を読み、適切な行動をとる",
+                                "placeholderText": "例：初対面の人々が集まる懇親会で、緊張感が漂っていたため、積極的に話題を提供し、和やかな雰囲気を作りました。"
+                            },
+                            {
+                                "questionText": "全体のバランスを見ながら行動する",
+                                "placeholderText": "例：グループ発表の準備で、各メンバーの進捗状況を把握し、遅れている部分があればサポートに入るなど、全体のバランスを考慮して行動しました。"
+                            }
+                        ]
+                    },
+                    "規律性": {
+                        "name": "規律性",
+                        "description": "社会のルールや人との約束を守る力",
+                        "questions": [
+                           
+                            {
+                                "questionText": "約束やルールを厳守する",
+                                "placeholderText": "例：友人との約束はもちろん、サークルの会則や大学の規則などを常に守るように心がけています。"
+                            },
+                            {
+                                "questionText": "時間や期限を守る",
+                                "placeholderText": "例：レポートの提出期限やアルバイトのシフト開始時間など、時間に関する約束は必ず守ります。"
+                            },
+                            {
+                                "questionText": "社会的な規範やマナーを遵守する",
+                                "placeholderText": "例：公共の場でのマナーや、目上の人への言葉遣いなど、社会人として基本的な規範を意識して行動しています。"
+                            },
+                            {
+                                "questionText": "組織の規則や手順に従う",
+                                "placeholderText": "例：アルバイト先で定められた業務手順や安全規則を正しく理解し、それに従って作業を行いました。"
+                            },
+                            {
+                                "questionText": "倫理的に正しい判断をする",
+                                "placeholderText": "例：課題で参考文献を引用する際は、著作権に配慮し、適切な引用ルールに従って記載しました。"
+                            }
+                        ]
+                    },
+                    "ストレスコントロール力": {
+                        "name": "ストレスコントロール力",
+                        "description": "ストレスの発生源を把握し、対処する力",
+                        "questions": [
+                            
+                            {
+                                "questionText": "ストレスの原因を冷静に分析できる",
+                                "placeholderText": "例：試験前に強いプレッシャーを感じた際、何が不安の原因なのかを紙に書き出して冷静に分析しました。"
+                            },
+                            {
+                                "questionText": "ストレスを感じても感情的にならずに対処できる",
+                                "placeholderText": "例：アルバイトで理不尽な要求をされた際も、感情的にならず、まずは深呼吸をして落ち着いて対応しました。"
+                            },
+                            {
+                                "questionText": "自分なりのストレス解消法を持っている",
+                                "placeholderText": "例：適度な運動（ジョギング）や音楽を聴くこと、友人と話すことなど、自分なりのストレス解消法をいくつか持っています。"
+                            },
+                            {
+                                "questionText": "困難な状況でも前向きに物事を捉えることができる",
+                                "placeholderText": "例：研究で行き詰まった際も、「この経験が成長に繋がる」と前向きに捉え、粘り強く解決策を探しました。"
+                            },
+                            {
+                                "questionText": "周囲に相談したり助けを求めたりできる",
+                                "placeholderText": "例：一人で抱えきれない問題に直面した際は、友人や先輩、教授などに素直に相談し、助けを求めることができます。"
+                            }  
+                        ]
+                    }
+                }
+            }
+        };
+
+        // 適職マッチング用データ
+        const jobMatchingData = {
+            "主体性": [
+                { name: "起業家／新規事業開発", description: "自らアイデアを出し、事業を推進していく力が求められます。", threshold: 4.0 },
+                { name: "プロジェクトマネージャー／リーダー", description: "チームを牽引し、目標達成に向けて主体的に行動します。", threshold: 3.8 }
+            ],
+            "働きかけ力": [
+                { name: "営業職／渉外担当", description: "顧客や関係者に積極的に働きかけ、良好な関係を構築し成果を出す力が重要です。", threshold: 3.5 },
+                { name: "コンサルタント", description: "クライアントを巻き込み、課題解決や変革を推進するコミュニケーション能力が必要です。", threshold: 4.0 }
+            ],
+            "実行力": [
+                { name: "イベントプランナー／運営スタッフ", description: "目標達成に向けた計画を確実に実行し、成果を出す力が求められます。", threshold: 3.5 },
+                { name: "施工管理／生産管理", description: "計画通りに物事を進め、品質や納期を管理する実行力が不可欠です。", threshold: 3.8 }
+            ],
+            "課題発見力": [
+                { name: "経営企画／事業企画", description: "現状を多角的に分析し、本質的な課題を発見して事業戦略を立案します。", threshold: 4.0 },
+                { name: "データアナリスト／リサーチャー", description: "データや情報から課題を発見し、改善策や新たな知見を導き出す能力が必要です。", threshold: 3.8 }
+            ],
+            "計画力": [
+                { name: "プロジェクトマネージャー", description: "課題解決のための具体的なプロセスを設計し、リソースを配分して計画的に実行します。", threshold: 3.8 },
+                { name: "サプライチェーンマネジメント", description: "複雑な物流プロセスを計画・管理し、効率化を図ります。", threshold: 3.5 }
+            ],
+            "創造力": [
+                { name: "デザイナー（UI/UX、グラフィック等）", description: "既存の枠にとらわれず、新しいアイデアや表現を生み出し形にする力が求められます。", threshold: 3.8 },
+                { name: "商品開発／研究開発（R&D）", description: "斬新な発想で新しい製品や技術を生み出します。", threshold: 3.5 }
+            ],
+            "発信力": [
+                { name: "広報／PR／マーケティングコミュニケーション", description: "企業の魅力や情報を効果的に発信し、ブランドイメージを構築します。", threshold: 3.5 },
+                { name: "教師／研修講師／プレゼンター", description: "分かりやすく情報を伝え、相手の理解と行動を促す力が重要です。", threshold: 3.8 }
+            ],
+            "傾聴力": [
+                { name: "カウンセラー／キャリアアドバイザー／相談員", description: "相手の話を深く丁寧に聴き、真のニーズや課題を理解する力が重要です。", threshold: 4.0 },
+                { name: "カスタマーサポート／顧客対応", description: "顧客の声に真摯に耳を傾け、問題解決や満足度向上に繋げます。", threshold: 3.5 }
+            ],
+            "柔軟性": [
+                { name: "海外営業／国際関連業務", description: "異なる文化や価値観を理解し、変化の激しい状況に柔軟に対応する能力が必要です。", threshold: 3.8 },
+                { name: "スタートアップ企業社員／新規事業担当", description: "変化の速い環境で、状況に応じて柔軟に役割や業務をこなします。", threshold: 3.5 }
+            ],
+            "状況把握力": [
+                { name: "秘書／アシスタント業務", description: "周囲の状況や関係者の意図を的確に把握し、先回りしたサポートを提供します。", threshold: 3.5 },
+                { name: "航空管制官／ディスパッチャー／運行管理者", description: "複雑な状況をリアルタイムで正確に把握し、適切な判断と指示を下します。", threshold: 4.0 }
+            ],
+            "規律性": [
+                { name: "公務員／法務・コンプライアンス担当", description: "法令や社会規範、組織のルールを遵守し、公正かつ正確に業務を遂行します。", threshold: 3.8 },
+                { name: "品質管理／監査担当", description: "定められた基準や手順に従い、製品やサービスの品質維持・向上に努めます。", threshold: 3.5 }
+            ],
+            "ストレスコントロール力": [
+                { name: "医療従事者（医師、看護師など）", description: "高いプレッシャーや緊急時にも冷静さを保ち、適切な対応を行う能力が求められます。", threshold: 4.0 },
+                { name: "危機管理担当／カスタマーハラスメント対応", description: "ストレスフルな状況下でも冷静に状況を判断し、的確な対応を行います。", threshold: 3.8 }
+            ]
+        };
+
+        // DOM要素
+        const elements = {
+            categorySelection: document.getElementById('categorySelection'),
+            questionSection: document.getElementById('questionSection'),
+            resultsContainer: document.getElementById('resultsContainer'),
+            questionCards: document.getElementById('questionCards'),
+            currentCategoryTitle: document.getElementById('currentCategoryTitle'),
+            categoryDescription: document.getElementById('categoryDescription'),
+            detailedAnalysis: document.getElementById('detailedAnalysis'),
+            jobMatchingResults: document.getElementById('jobMatchingResults'), // 追加
+            episodeCollection: document.getElementById('episodeCollection'),
+            progressBar: document.getElementById('progressBar'),
+            progressText: document.getElementById('progressText'),
+            overallProgress: document.getElementById('overallProgress'),
+            categoryStatus: document.getElementById('categoryStatus'),
+            backToCategories: document.getElementById('backToCategories'),
+            saveResponses: document.getElementById('saveResponses'),
+            backToQuestions: document.getElementById('backToQuestions'),
+            printResults: document.getElementById('printResults'),
+            saveCompleteResults: document.getElementById('saveCompleteResults'),
+            showFinalResults: document.getElementById('showFinalResults'),
+            profileText: document.getElementById('profileText'),
+            radarChart: document.getElementById('radarChart')
+        };
+
+        // イベントリスナーの設定
+        function initializeEventListeners() {
+            document.querySelectorAll('.pill-btn').forEach(btn => {
+                btn.addEventListener('click', () => selectCategory(btn.dataset.category));
+            });
+
+            elements.backToCategories.addEventListener('click', showCategorySelection);
+            elements.saveResponses.addEventListener('click', saveCurrentCategoryResponses);
+            elements.backToQuestions.addEventListener('click', showCategorySelection);
+            elements.printResults.addEventListener('click', printResults);
+            elements.saveCompleteResults.addEventListener('click', saveCompleteResults);
+            elements.showFinalResults.addEventListener('click', showFinalResults);
+        }
+
+        // カテゴリ選択画面を表示
+        function showCategorySelection() {
+            elements.categorySelection.classList.remove('hidden');
+            elements.questionSection.classList.add('hidden');
+            elements.resultsContainer.classList.add('hidden');
+            updateProgress();
+        }
+
+        // カテゴリ選択
+        function selectCategory(category) {
+            state.currentCategory = category;
+            elements.categorySelection.classList.add('hidden');
+            elements.questionSection.classList.remove('hidden');
+            elements.resultsContainer.classList.add('hidden');
+            
+            const categoryData = questionsData[category];
+            elements.currentCategoryTitle.textContent = categoryData.name;
+            elements.categoryDescription.textContent = categoryData.description;
+            
+            generateQuestionCards(category);
+            restoreExistingAnswers(category);
+            updateProgress();
+        }
+
+        // 質問カードを生成
+        function generateQuestionCards(category) {
+            elements.questionCards.innerHTML = '';
+            const categoryData = questionsData[category];
+            
+            Object.keys(categoryData.abilities).forEach(abilityKey => {
+                const ability = categoryData.abilities[abilityKey];
+                
+                ability.questions.forEach((question, index) => {
+                    const card = document.createElement('div');
+                    card.className = `question-card ${category}`;
+                    
+                    card.innerHTML = `
+                        <div class="question-header">
+                            <span class="question-number">${ability.name}</span>
+                        </div>
+                        <div class="question-text">${index + 1}. ${question.questionText}</div>                  
+                        <div class="rating-labels">
+                            <span>1 (苦手)</span>
+                            <span>2</span>
+                            <span>3 (普通)</span>
+                            <span>4</span>
+                            <span>5 (得意)</span>
+                        </div>
+                        <div class="rating-container" id="rating-${abilityKey}-${index}">
+                            <div class="rating-btn" data-value="1">1</div>
+                            <div class="rating-btn" data-value="2">2</div>
+                            <div class="rating-btn" data-value="3">3</div>
+                            <div class="rating-btn" data-value="4">4</div>
+                            <div class="rating-btn" data-value="5">5</div>
+                        </div>
+                        
+                        <textarea id="example-${abilityKey}-${index}" placeholder="${question.placeholderText}"></textarea>
+                    `;
+                    elements.questionCards.appendChild(card);
+                    
+                    // 評価ボタンのイベントリスナー設定
+                    const ratingContainer = document.getElementById(`rating-${abilityKey}-${index}`);
+                    ratingContainer.querySelectorAll('.rating-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            ratingContainer.querySelectorAll('.rating-btn').forEach(b => {
+                                b.classList.remove('selected');
+                            });
+                            this.classList.add('selected');
+                        });
+                    });
+                });
+            });
+        }
+
+        // 既存の回答を復元
+        function restoreExistingAnswers(category) {
+            if (!state.responses[category]) return;
+            
+            const categoryData = questionsData[category];
+            Object.keys(categoryData.abilities).forEach(abilityKey => {
+                const ability = categoryData.abilities[abilityKey];
+                ability.questions.forEach((question, questionIndex) => {
+                    const savedResponse = state.responses[category][abilityKey]?.[questionIndex];
+                    if (savedResponse !== undefined) {
+                        const ratingContainer = document.getElementById(`rating-${abilityKey}-${questionIndex}`);
+                        if (ratingContainer) {
+                            const btn = ratingContainer.querySelector(`[data-value="${savedResponse}"]`);
+                            if (btn) {
+                                btn.classList.add('selected');
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        // 現在のカテゴリの回答を保存
+        function saveCurrentCategoryResponses() {
+            const category = state.currentCategory;
+            if (!category) return;
+
+            state.responses[category] = {};
+            const categoryData = questionsData[category];
+            
+            Object.keys(categoryData.abilities).forEach(abilityKey => {
+                const ability = categoryData.abilities[abilityKey];
+                state.responses[category][abilityKey] = [];
+                
+                ability.questions.forEach((question, questionIndex) => {
+                    const ratingContainer = document.getElementById(`rating-${abilityKey}-${questionIndex}`);
+                    const selectedBtn = ratingContainer?.querySelector('.selected');
+                    const ratingValue = selectedBtn ? parseInt(selectedBtn.dataset.value) : 0;
+                    
+                    state.responses[category][abilityKey].push(ratingValue);
+                });
+            });
+
+            state.completedCategories.add(category);
+            updateProgress();
+            showCategorySelection();
+        }
+
+        // 進捗状況を更新
+        function updateProgress() {
+            const totalCategories = 3;
+            const completedCount = state.completedCategories.size;
+            const progressPercent = Math.round((completedCount / totalCategories) * 100);
+            
+            // 進捗バー更新
+            elements.progressBar.style.width = `${progressPercent}%`;
+            elements.progressText.textContent = `${progressPercent}%`;
+            elements.overallProgress.textContent = `全体進捗: ${progressPercent}% (${completedCount}/${totalCategories}カテゴリ完了)`;
+            
+            // カテゴリステータス更新
+            document.querySelectorAll('.status-card').forEach(card => {
+                const category = card.dataset.category;
+                card.className = 'status-card';
+                
+                if (state.completedCategories.has(category)) {
+                    card.classList.add('completed');
+                    card.querySelector('small').textContent = '完了';
+                    
+                    // 対応するボタンに完了マークを追加
+                    document.querySelector(`.pill-btn[data-category="${category}"]`).classList.add('completed');
+                } else {
+                    card.classList.add(state.currentCategory === category ? 'current' : 'pending');
+                    card.querySelector('small').textContent = state.currentCategory === category ? '実施中' : '未実施';
+                }
+            });
+            
+            // 全カテゴリ完了時に最終結果ボタンを表示
+            elements.showFinalResults.classList.toggle('hidden', completedCount < totalCategories);
+        }
+
+        // 最終結果表示
+        function showFinalResults() {
+            if (state.completedCategories.size < 3) {
+                alert("すべてのカテゴリを完了してください");
+                return;
+            }
+
+            elements.categorySelection.classList.add('hidden');
+            elements.questionSection.classList.add('hidden');
+            elements.resultsContainer.classList.remove('hidden');
+            
+            generateResults();
+        }
+
+        // 結果を生成
+        function generateResults() {
+            elements.detailedAnalysis.innerHTML = '';
+            elements.episodeCollection.innerHTML = '';
+            
+            const categoryScores = {}; // 各大カテゴリの平均スコア用
+            // レーダーチャート用のデータを格納する配列を初期化
+            const radarChartLabels = [];
+            const radarChartData = [];
+            const radarChartPointColors = [];
+
+            let totalOverallScore = 0;
+            let totalCategoriesCount = 0;
+            
+            // 各カテゴリのスコアを計算
+            for (const category in questionsData) {
+                if (state.responses[category]) {
+                    const categoryData = questionsData[category];
+                    let categorySum = 0;
+                    let abilityCount = 0;
+                    
+                    const abilityDetails = [];
+                    
+                    // 各能力のスコアを計算
+                    for (const abilityKey in categoryData.abilities) {
+                        if (state.responses[category][abilityKey]) {
+                            const ability = categoryData.abilities[abilityKey];
+                            const abilityAllScores = state.responses[category][abilityKey]; // 全てのスコアを取得 (0も含む)
+                            
+                            // 質問数で割って平均スコアを計算
+                            const abilityAvg = ability.questions.length > 0 ? 
+                                abilityAllScores.reduce((a, b) => a + b, 0) / ability.questions.length : 0;
+                            
+                            categorySum += abilityAvg;
+                            abilityCount++;
+                            
+                            // レーダーチャート用データ
+                            radarChartLabels.push(ability.name); // 能力名をラベルとして追加
+                            radarChartData.push(abilityAvg);     // 能力の平均スコアを追加
+                            radarChartPointColors.push(categoryData.color); // この能力が属するカテゴリの色をポイント色として追加
+                            
+                            // 能力ごとの詳細を追加
+                            abilityDetails.push(`
+                                <div class="strength-card ${category}">
+                                    <div class="strength-title">${ability.name} (スコア: ${abilityAvg.toFixed(1)})</div>
+                                    <div>${ability.description}</div>
+                                    <div class="strength-feedback">${getStrengthFeedback(abilityAvg, ability.name)}</div>
+                                </div>
+                            `);
+                            
+                            // エピソードを収集
+                            ability.questions.forEach((question, qIndex) => {
+                                const textarea = document.getElementById(`example-${abilityKey}-${qIndex}`);
+                                if (textarea && textarea.value) {
+                                    elements.episodeCollection.innerHTML += `
+                                        
+                                        <div class="episode-card ${category}">
+                                            <div class="episode-title">${ability.name}: ${question.questionText}</div>   
+                                            <div class="episode-content">${textarea.value}</div>
+                                        </div>
+                                    `;
+                                }
+                            });
+                        }
+                    }
+                    
+                    // カテゴリの平均スコアを計算
+                    const categoryAvg = abilityCount > 0 ? categorySum / abilityCount : 0;
+                    categoryScores[category] = categoryAvg;
+                    totalOverallScore += categoryAvg;
+                    totalCategoriesCount++;
+                    
+                    // 詳細分析セクションに追加
+                    elements.detailedAnalysis.innerHTML += `
+                        <div class="category-result">
+                            <h3>${categoryData.name} (平均スコア: ${categoryAvg.toFixed(1)})</h3>
+                            ${abilityDetails.join('')}
+                        </div>
+                    `;
+                }
+            }
+            
+             // プロフィールテキスト生成
+            const avgOverallScore = totalCategoriesCount > 0 ? totalOverallScore / totalCategoriesCount : 0;
+            elements.profileText.innerHTML = `
+                <p>あなたの社会人基礎力の総合スコアは <strong>${avgOverallScore.toFixed(1)}</strong> です（5点満点）。</p>
+                <p>${getOverallFeedback(avgOverallScore)}</p>
+                <p>${getCategoryStrengths(categoryScores)}</p>
+            `;
+            
+            // レーダーチャート生成
+            renderRadarChart(radarChartLabels, radarChartData, radarChartPointColors);
+
+            // 適職マッチング結果生成
+            const abilityScoresMap = {};
+            radarChartLabels.forEach((label, index) => {
+                abilityScoresMap[label] = radarChartData[index];
+            });
+            generateJobMatchingResults(abilityScoresMap);
+        }
+
+        // 強みのフィードバックを生成
+        function getStrengthFeedback(score, abilityName) {
+            if (score >= 4.5) return `あなたの「${abilityName}」は非常に高いレベルです。この強みをさらに活かす方法を考えましょう。`;
+            if (score >= 4.0) return `あなたの「${abilityName}」は高いレベルです。この強みを活かす場面を増やしましょう。`;
+            if (score >= 3.0) return `あなたの「${abilityName}」は平均的なレベルです。さらに向上させる余地があります。`;
+            if (score >= 2.0) return `あなたの「${abilityName}」はやや低いレベルです。改善のためのトレーニングが必要です。`;
+            return `あなたの「${abilityName}」は低いレベルです。集中的な改善が必要です。`;
+        }
+
+        // カテゴリ別の強みを特定
+        function getCategoryStrengths(categoryScores) {
+            let maxScore = 0;
+            let strongestCategory = '';
+            
+            for (const category in categoryScores) {
+                if (categoryScores[category] > maxScore) {
+                    maxScore = categoryScores[category];
+                    strongestCategory = questionsData[category].name;
+                }
+            }
+            
+            if (maxScore >= 4.0) {
+                return `特に<strong>${strongestCategory}</strong>があなたの強みです。この能力をさらに伸ばし、他の分野にも活かすことを考えましょう。`;
+            } else if (maxScore >= 3.0) {
+                return `<strong>${strongestCategory}</strong>が比較的得意な分野です。この能力を基盤に、他の分野も強化していきましょう。`;
+            } else {
+                return `全体的にスコアが低めです。<strong>${strongestCategory}</strong>を起点に、他の能力もバランスよく向上させていきましょう。`;
+            }
+        }
+
+                // 総合評価を生成
+        function getOverallFeedback(score) {
+            if (score >= 4.5) return "あなたの社会人基礎力は非常に高いレベルです。リーダーとしての素質があり、様々な場面で活躍できるでしょう。今後はより高度なスキルや専門知識の習得に取り組むと良いでしょう。";
+            if (score >= 4.0) return "あなたの社会人基礎力は高いレベルです。チームの中核メンバーとして活躍できる能力を持っています。さらに成長するために、自分の強みを活かす機会を積極的に探しましょう。";
+            if (score >= 3.0) return "あなたの社会人基礎力は平均以上のレベルです。バランスの取れた能力を持っています。特に得意な分野をさらに伸ばすと共に、やや苦手な分野にも取り組んでみましょう。";
+            if (score >= 2.0) return "あなたの社会人基礎力には改善の余地があります。特定の分野に注力してスキルアップを図ると良いでしょう。まずは自分の強みを見つけることから始めてみてください。";
+            return "社会人基礎力を全体的に強化する必要があります。一つずつ着実にスキルを身につけていくことが大切です。焦らずに継続的な改善に取り組みましょう。";
+        }
+
+        // レーダーチャートを描画
+        function renderRadarChart(chartLabels, chartData, chartPointColors) {
+            const ctx = elements.radarChart.getContext('2d');
+            
+            // 既存のチャートがあれば破棄
+            if (state.radarChart) {
+                state.radarChart.destroy();
+            }
+                        
+            // チャート作成
+            state.radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'あなたの能力別スコア',
+                        data: chartData,
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)', // 紫系の半透明塗りつぶし
+                        borderColor: 'rgba(153, 102, 255, 1)',     // 紫系の線
+                        borderWidth: 2,
+                        pointBackgroundColor: chartPointColors, // ポイントの色
+                        pointBorderColor: '#fff', // ポイントの枠線
+                        pointHoverRadius: 7,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 5,
+                            ticks: {
+                                stepSize: 1,
+                                backdropColor: 'rgba(0, 0, 0, 0)'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 11, // ラベルが多いので少し小さく
+                                    family: "'Noto Sans JP', sans-serif"
+                                },
+                                padding: 5 // ラベルのパディング調整
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: { // チャートエリアのパディング
+                            top: 10, bottom: 10, left: 10, right: 10
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    family: "'Noto Sans JP', sans-serif",
+                                    size: 14
+                                },
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) { return `${context.label}: ${context.raw.toFixed(1)}`; }
+                            }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.1
+                        }
+                    }
+                }
+            });
+        }
+
+        // 適職マッチング結果を生成・表示
+        function generateJobMatchingResults(abilityScoresMap) {
+            const baseThreshold = 3.5; // おすすめするための基本的なスコア閾値
+            let recommendedJobsHtml = '';
+            const recommendedJobs = new Map(); // 職業名 => { description, matchedAbilities: [{name, score}] }
+
+            for (const abilityName in abilityScoresMap) {
+                const score = abilityScoresMap[abilityName];
+                if (jobMatchingData[abilityName]) {
+                    jobMatchingData[abilityName].forEach(job => {
+                        // 職業ごとの閾値があればそれを使用、なければ基本閾値
+                        const currentThreshold = job.threshold !== undefined ? job.threshold : baseThreshold;
+                        if (score >= currentThreshold) {
+                            if (!recommendedJobs.has(job.name)) {
+                                recommendedJobs.set(job.name, {
+                                    description: job.description,
+                                    matchedAbilities: []
+                                });
+                            }
+                            recommendedJobs.get(job.name).matchedAbilities.push({ name: abilityName, score: score.toFixed(1) });
+                        }
+                    });
+                }
+            }
+
+            if (recommendedJobs.size > 0) {
+                recommendedJobs.forEach((jobDetails, jobName) => {
+                    let abilitiesHtml = jobDetails.matchedAbilities.map(ab => `<li>${ab.name} (スコア: ${ab.score})</li>`).join('');
+                    recommendedJobsHtml += `
+                        <div class="strength-card teamwork"> {/* カテゴリに応じてクラス変更も検討 */}
+                            <div class="strength-title">${jobName}</div>
+                            <p>${jobDetails.description}</p>
+                            <p><strong>関連するあなたの強み:</strong></p>
+                            <ul>${abilitiesHtml}</ul>
+                        </div>
+                    `;
+                });
+            } else {
+                recommendedJobsHtml = "<p>今回の診断結果から特におすすめできる職業は見つかりませんでした。より詳細な自己分析やキャリア相談も検討してみてください。</p>";
+            }
+            elements.jobMatchingResults.innerHTML = recommendedJobsHtml;
+        }
+
+        // 16進数カラーコードをRGBAに変換
+        function hexToRgba(hex, alpha) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        // 結果を印刷
+        function printResults() {
+            window.print();
+        }
+
+        // 完全版結果を保存
+        function saveCompleteResults() {
+            // 1. 結果データをJSON形式で準備
+            const resultData = {
+                date: new Date().toISOString(),
+                scores: {},
+                feedback: document.getElementById('profileText').innerHTML,
+                episodes: [] // エピソードを格納する配列
+            };
+            
+            // 2. スコアデータとエピソードを追加
+            for (const category in questionsData) {
+                if (state.responses[category]) {
+                    resultData.scores[category] = {};
+                    const categoryData = questionsData[category];
+                    
+                    for (const abilityKey in categoryData.abilities) {
+                        if (state.responses[category][abilityKey]) {
+                            const ability = categoryData.abilities[abilityKey]; // ability を取得
+                            const abilityAllScores = state.responses[category][abilityKey];
+                            const abilityAvg = ability.questions.length > 0 ?
+                                abilityAllScores.reduce((a, b) => a + b, 0) / ability.questions.length : 0;
+                            resultData.scores[category][abilityKey] = abilityAvg;
+
+                            // エピソードも収集
+                            ability.questions.forEach((question, qIndex) => {
+                                const textarea = document.getElementById(`example-${abilityKey}-${qIndex}`);
+                                if (textarea && textarea.value) {
+                                    resultData.episodes.push({
+                                        category: categoryData.name, // カテゴリ名
+                                        ability: ability.name,    // 能力要素名
+                                        question: question.questionText, // 質問文
+                                        episode: textarea.value   // 入力されたエピソード
+                                    });
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+            
+            // 3. データをJSON文字列に変換
+            const jsonData = JSON.stringify(resultData, null, 2); // null, 2 で整形されたJSON文字列
+            
+            // 4. JSONデータをファイルとしてダウンロード
+            const blob = new Blob([jsonData], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'social_skills_assessment_results.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            alert("完全版結果をJSONファイルとして保存しました。");
+        }
+
+        // ページ読み込み時にイベントリスナーを初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+        });
+    </script>
+</body>
+</html>
